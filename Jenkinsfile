@@ -19,29 +19,9 @@ pipeline {
             steps {
                 sh 'terraform init -upgrade -reconfigure'
                 sh "terraform validate"
-                sh "terraform plan"
+                sh "terraform apply"
             }
         }
-        stage('Approval') {
-           when {
-               not {
-                   equals expected: true, actual: params.autoApprove
-               }
-           }
-           
-           steps {
-               script {
-                    input message: "Do you want to apply the plan?",
-                    parameters: [text(name: 'Plan', description: 'Please review the plan')]
-
-               }
-           }
-       }
-
-        stage('Apply') {
-            steps {
-                sh "terraform apply --auto-approve"
-            }
-        }
+        
     }
 }
