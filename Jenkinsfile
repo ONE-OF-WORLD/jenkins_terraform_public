@@ -17,9 +17,8 @@ pipeline {
         stage('Plan') {
 
             steps {
-                sh 'terraform init -upgrade -reconfigure'
+                sh 'terraform init -upgrade'
                 sh "terraform validate"
-                sh "terraform plan"
                 sh "terraform apply"
             }
         }
