@@ -49,6 +49,22 @@ pipeline {
         }
     }
 
+        stage ('Terraform Destroy') {
+            when {
+                expression {
+                    return params.destroyResources
+                }
+            }
+            steps {
+                script {
+                    def response = input(message: 'Do you want to destroy the Terraform resources?', ok: 'Destroy', parameters: [booleanParam(defaultValue: false, description: 'Check this box to destroy the resources', name: 'destroy')])
+                    if (response) {
+                        sh 'terraform destroy -auto-approve'
+                    }
+                }
+            }
+        }    
+
     post {
         always {
             deleteDir()
