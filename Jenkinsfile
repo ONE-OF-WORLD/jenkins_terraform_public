@@ -13,15 +13,45 @@ pipeline {
     }
 
     stages {
+      stage ('Checkout') {
+          steps {
+              checkout scm
+         }
+      }
 
-        stage('Plan') {
-
+        stage ('Terraform Init') {
             steps {
-                sh 'terraform init -upgrade -migrate-state'
-                sh "terraform validate"
-                sh "terraform apply"
+                sh 'terraform init -upgrade -reconfigure'
             }
         }
-        
+
+        stage ('Terraform Validate') {
+            steps {
+                sh 'terraform validate'
+            }
+        }
+
+        stage ('Terraform Plan') {
+            steps {
+                sh 'terraform plan -out=myplan'
+            }
+        }
+
+        stage ('Terraform Apply') {
+            steps {
+                script {
+                    def response = input(message: 'Do you want to apply the Terraform changes?', ok: 'Apply', parameters: [booleanParam(defaultValue: false, description: 'Check this box to apply the changes', name: 'applyChanges')])
+                    if (response) {
+                        sh 'terraform apply myplan'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            deleteDir()
+        }
     }
 }
