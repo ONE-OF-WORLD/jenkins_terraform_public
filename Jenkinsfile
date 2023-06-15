@@ -47,8 +47,7 @@ pipeline {
                 }
             }
         }
-    }
-
+    
         stage ('Terraform Destroy') {
             when {
                 expression {
@@ -64,7 +63,8 @@ pipeline {
                 }
             }
         }    
-
+    }
+    
     post {
         always {
             deleteDir()
