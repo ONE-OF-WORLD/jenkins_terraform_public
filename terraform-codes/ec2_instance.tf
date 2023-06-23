@@ -65,7 +65,7 @@ resource "aws_instance" "houstagram-ec2-bastion" {
   vpc_security_group_ids = [aws_security_group.houstagram-sg-bastion.id]
 }
 
-resource "aws_instance" "houstagram-ec2-bastion" {
+resource "aws_instance" "houstagram-ec2-bastion2" {
 
   ami                         = "ami-0454bb2fefc7de534"
   associate_public_ip_address = "true"
