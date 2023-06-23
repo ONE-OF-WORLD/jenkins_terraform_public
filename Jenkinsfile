@@ -15,97 +15,77 @@ pipeline {
 
     stages {
         stage('Terraform - Backend') {
-            stages {
-                stage('Initialize and Plan') {
-                    steps {
-                        dir('terraform-backend') {
-                            script {
-                                sh 'terraform init -upgrade'
-                                sh "terraform validate"
-                                sh "terraform plan"
-                            }
-                        }
+            when {
+                expression { !params.performDestroy }
+            }
+            steps {
+                dir('terraform-backend') {
+                    script {
+                        sh 'terraform init -upgrade'
+                        sh "terraform validate"
+                        sh "terraform plan"
                     }
                 }
-                stage('Approval') {
-                    when {
-                        not {
-                            equals expected: true, actual: params.autoApprove
-                        }
-                    }
-
-                    steps {
-                        script {
-                            input message: "Do you want to apply the plan?",
-                            parameters: [text(name: 'Plan', description: 'Please review the plan')]
-                        }
-                    }
-                }
-                stage('Apply') {
-                    steps {
-                        dir('terraform-backend') {
-                            sh "terraform apply --auto-approve"
-                        }
-                    }
-                }
-                stage('Destroy') {
-                    when {
-                        expression { params.performDestroy == true }
-                    }
-                    steps {
-                        dir('terraform-codes') {
-                            sh 'terraform init -input=false'
-                            sh 'terraform destroy -input=false -auto-approve'
-                        }
+            }
+        }
+        stage('Terraform - Backend Apply') {
+            when {
+                expression { !params.performDestroy }
+            }
+            steps {
+                dir('terraform-backend') {
+                    script {
+                        sh "terraform apply --auto-approve"
                     }
                 }
             }
         }
         stage('Terraform - Codes') {
-            stages {
-                stage('Initialize and Plan') {
-                    steps {
-                        dir('terraform-codes') {
-                            script {
-                                sh 'terraform init -upgrade'
-                                sh "terraform validate"
-                                sh "terraform plan"
-                            }
-                        }
+            when {
+                expression { !params.performDestroy }
+            }
+            steps {
+                dir('terraform-codes') {
+                    script {
+                        sh 'terraform init -upgrade'
+                        sh "terraform validate"
+                        sh "terraform plan"
                     }
                 }
-                stage('Approval') {
-                    when {
-                        not {
-                            equals expected: true, actual: params.autoApprove
-                        }
-                    }
-
-                    steps {
-                        script {
-                            input message: "Do you want to apply the plan?",
-                            parameters: [text(name: 'Plan', description: 'Please review the plan')]
-                        }
+            }
+        }
+        stage('Terraform - Codes Apply') {
+            when {
+                expression { !params.performDestroy }
+            }
+            steps {
+                dir('terraform-codes') {
+                    script {
+                        sh "terraform apply --auto-approve"
                     }
                 }
-                stage('Apply') {
-                    steps {
-                        dir('terraform-codes') {
-                            sh "terraform apply --auto-approve"
-                        }
-                    }
+            }
+        }
+        // Destroy stages
+        stage('Terraform - Codes Destroy') {
+            when {
+                expression { params.performDestroy }
+            }
+            steps {
+                dir('terraform-codes') {
+                    sh 'terraform init -input=false'
+                    sh 'terraform destroy -input=false -auto-approve'
                 }
-                    
-                stage('Destroy') {
-                    when {
-                        expression { params.performDestroy == true }
-                    }
-                    steps {
-                        dir('terraform-backend') {
-                            sh 'terraform init -input=false'
-                            sh 'terraform destroy -input=false -auto-approve'
-                        }
-                    }
+            }
+        }
+        stage('Terraform - Backend Destroy') {
+            when {
+                expression { params.performDestroy }
+            }
+            steps {
+                dir('terraform-backend') {
+                    sh 'terraform init -input=false'
+                    sh 'terraform destroy -input=false -auto-approve'
                 }
             }
         }
