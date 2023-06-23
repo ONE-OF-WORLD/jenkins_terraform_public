@@ -4,6 +4,8 @@ pipeline {
     parameters {
         string(name: 'environment', defaultValue: 'terraform', description: 'Workspace/environment file to use for deployment')
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
+        booleanParam(name: 'performDestroy', defaultValue: false, description: 'Set to true to perform terraform destroy')
+  )
     }
 
     environment {
@@ -47,7 +49,17 @@ pipeline {
                         }
                     }
                 }
-            }
+                stage('Destroy') {
+                    when {
+                        expression { params.performDestroy == true }
+                    }
+                    steps {
+                        dir('terraform-codes') {
+                            sh 'terraform init -input=false'
+                            sh 'terraform destroy -input=false -auto-approve'
+                        }
+                    }
+                }
         }
         stage('Terraform - Codes') {
             stages {
@@ -80,6 +92,18 @@ pipeline {
                     steps {
                         dir('terraform-codes') {
                             sh "terraform apply --auto-approve"
+                        }
+                    }
+                }
+                    
+                stage('Destroy') {
+                    when {
+                        expression { params.performDestroy == true }
+                    }
+                    steps {
+                        dir('terraform-backend') {
+                            sh 'terraform init -input=false'
+                            sh 'terraform destroy -input=false -auto-approve'
                         }
                     }
                 }
