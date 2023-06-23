@@ -1,46 +1,24 @@
 pipeline {
     agent any
-
-    parameters {
-        string(name: 'environment', defaultValue: 'terraform', description: 'Workspace/environment file to use for deployment')
-        booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
-    }
-
-     environment {
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-        REGION = credentials('AWS_REGION')
-    }
-
     stages {
-
-        stage('Plan') {
-
+        stage('Terraform - Initialize and Apply Backend') {
             steps {
-                sh 'terraform init -upgrade'
-                sh "terraform validate"
-                sh "terraform plan"
+                dir('terraform-backend') {
+                    script {
+                        sh 'terraform init'
+                        sh 'terraform apply -auto-approve'
+                    }
+                }
             }
         }
-        stage('Approval') {
-           when {
-               not {
-                   equals expected: true, actual: params.autoApprove
-               }
-           }
-           
-           steps {
-               script {
-                    input message: "Do you want to apply the plan?",
-                    parameters: [text(name: 'Plan', description: 'Please review the plan')]
-
-               }
-           }
-       }
-
-        stage('Apply') {
+        stage('Terraform - Initialize and Apply Codes') {
             steps {
-                sh "terraform apply --auto-approve"
+                dir('terraform-codes') {
+                    script {
+                        sh 'terraform init'
+                        sh 'terraform apply -auto-approve'
+                    }
+                }
             }
         }
     }
