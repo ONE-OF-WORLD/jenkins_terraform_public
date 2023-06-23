@@ -11,6 +11,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Terraform - Initialize and Apply Codes') {
             steps {
                 dir('terraform-codes') {
