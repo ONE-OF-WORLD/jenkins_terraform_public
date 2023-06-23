@@ -69,7 +69,7 @@ resource "aws_instance" "houstagram-ec2-bastion2" {
 
   ami                         = "ami-0454bb2fefc7de534"
   associate_public_ip_address = "true"
-  availability_zone           = "ap-northeast-2a"
+  availability_zone           = "ap-northeast-2c"
 
   iam_instance_profile        = aws_iam_instance_profile.houstagram-ec2-instance-profile.name
   key_name                    = "test-kp-bastion"
