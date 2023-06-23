@@ -4,8 +4,6 @@ pipeline {
     parameters {
         string(name: 'environment', defaultValue: 'terraform', description: 'Workspace/environment file to use for deployment')
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
-        booleanParam(name: 'destroyResources', defaultValue: false, description: 'Automatically destroy all resources after plan/apply?')
-
     }
 
      environment {
@@ -15,42 +13,35 @@ pipeline {
     }
 
     stages {
-      stage ('Checkout') {
-          steps {
-              checkout scm
-         }
-      }
 
+        stage('Plan') {
 
-
-        stage ('Terraform Validate') {
             steps {
-                sh 'terraform validate'
+                sh 'terraform init -upgrade'
+                sh "terraform validate"
+                sh "terraform plan"
             }
         }
+        stage('Approval') {
+           when {
+               not {
+                   equals expected: true, actual: params.autoApprove
+               }
+           }
+           
+           steps {
+               script {
+                    input message: "Do you want to apply the plan?",
+                    parameters: [text(name: 'Plan', description: 'Please review the plan')]
 
-        stage ('Terraform Plan') {
+               }
+           }
+       }
+
+        stage('Apply') {
             steps {
-                sh 'terraform plan -out=myplan'
+                sh "terraform apply --auto-approve"
             }
-        }
-
-        stage ('Terraform Apply') {
-            steps {
-                script {
-                    def response = input(message: 'Do you want to apply the Terraform changes?', ok: 'Apply', parameters: [booleanParam(defaultValue: false, description: 'Check this box to apply the changes', name: 'applyChanges')])
-                    if (response) {
-                        sh 'terraform apply myplan'
-                    }
-                }
-            }
-        }
-    
-    }
-
-    post {
-        always {
-            deleteDir()
         }
     }
 }
