@@ -1,4 +1,4 @@
-resource "aws_eks_cluster" "houstagram-eks-cluster-web" {
+resource "aws_eks_cluster" "houstagram-eks-cluster" {
 
   depends_on = [
     aws_iam_role_policy_attachment.houstagram-iam-policy-eks-cluster,
