@@ -63,14 +63,13 @@ resource "aws_instance" "houstagram-ec2-bastion" {
 
   subnet_id     = aws_subnet.houstagram-public-subnet1.id
   vpc_security_group_ids = [aws_security_group.houstagram-sg-bastion.id]
-  }
+}
 
-
-resource "aws_instance" "houstagram-ec2-bastion" {
+resource "aws_instance" "houstagram-ec2-bastion-pubic2" {
 
   ami                         = "ami-0454bb2fefc7de534"
   associate_public_ip_address = "true"
-  availability_zone           = "ap-northeast-2c"
+  availability_zone           = "ap-northeast-2a"
 
   iam_instance_profile        = aws_iam_instance_profile.houstagram-ec2-instance-profile.name
   key_name                    = "test-kp-bastion"
@@ -131,5 +130,4 @@ resource "aws_instance" "houstagram-ec2-bastion" {
 
   subnet_id     = aws_subnet.houstagram-public-subnet2.id
   vpc_security_group_ids = [aws_security_group.houstagram-sg-bastion.id]
-
 }
