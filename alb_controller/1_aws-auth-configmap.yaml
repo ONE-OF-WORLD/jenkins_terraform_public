@@ -1,0 +1,29 @@
+apiVersion: v1
+data:
+  mapRoles: |
+    - groups:
+      - system:bootstrappers
+      - system:nodes
+      rolearn: arn:aws:iam::673489540568:role/city-houstagram-iam-role-eks-nodegroup
+      username: system:node:{{EC2PrivateDNSName}}
+  mapUsers: |
+    - userarn: arn:aws:iam::673489540568:user/junghoun
+      username: junghoun
+      groups:
+        - system:masters
+    - userarn: arn:aws:iam::673489540568:user/hohyeon
+      username: hohyeon
+      groups:
+        - system:masters
+    - userarn: arn:aws:iam::673489540568:user/hyokyung
+      username: hyokyung
+      groups:
+        - system:masters
+    - userarn: arn:aws:iam::673489540568:user/seungjun
+      username: seungjun
+      groups:
+        - system:masters               
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
